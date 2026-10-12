@@ -1,1 +1,1 @@
-print("Hello World")
+print("Hallo Welt") #die kleuen mir nicht mein Schnitzel
