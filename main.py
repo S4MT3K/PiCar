@@ -1,6 +1,5 @@
-
-
 import streamlit as st
+from vilib import Vilib
 
 if st.button('Capture Image'):
     print('irgendwas')
@@ -13,7 +12,11 @@ if st.button('Disconnect'):
 
 on = st.toggle("Camera on")
 
+st.text("kameraFeed")
+a = st.container(border= True)
+
 if on:
     st.write("Camera activated !")
+    Vilib.camera_start(vflip=False, hflip=False)
 
 
