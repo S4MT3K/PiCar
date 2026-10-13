@@ -1,6 +1,8 @@
 import streamlit as st
 from vilib import Vilib
 
+host = st.context.headers.get("host", "localhost").split(":")[0] #muss das?
+
 if st.button('Capture Image'):
     print('irgendwas')
 
@@ -18,5 +20,6 @@ a = st.container(border= True)
 if on:
     st.write("Camera activated !")
     Vilib.camera_start(vflip=False, hflip=False)
+    a.html(f'<img src="http://{host}:9000/mjpg" style="width:100%">')
 
 
