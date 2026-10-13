@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 from vilib import Vilib
 
@@ -6,6 +7,10 @@ from vilib import Vilib
 def kamera_starten():
     Vilib.camera_start(vflip=False, hflip=False)
     Vilib.display(local=False, web=True)   # Stream auf http://<IP>:9000/mjpg
+    for _ in range(50):
+        if getattr(Vilib, "flask_img", None) is not None:
+            break
+        time.sleep(0.1)
     return True
 
 if st.button('Capture Image'):
