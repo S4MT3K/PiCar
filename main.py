@@ -26,4 +26,4 @@ if on:
     kamera_starten()
     st.write("Camera activated !")
     host = st.context.headers.get("host", "localhost").split(":")[0]
-    a.html(f'<img src="http://{host}:9000/mjpg" style="width:100%">')
+    a.html(f'<img src="http://{host}:8501/mjpg" style="width:100%">')
