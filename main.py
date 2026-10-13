@@ -1,16 +1,10 @@
-import time
 import streamlit as st
 from vilib import Vilib
 
-# Kamera + Webstream nur EINMAL starten, nicht bei jedem Klick
 @st.cache_resource
 def kamera_starten():
     Vilib.camera_start(vflip=False, hflip=False)
-    Vilib.display(local=False, web=True)   # Stream auf http://<IP>:9000/mjpg
-    for _ in range(50):
-        if getattr(Vilib, "flask_img", None) is not None:
-            break
-        time.sleep(0.1)
+    Vilib.display(local=False, web=False)   # kein Fenster, kein Webserver nötig
     return True
 
 if st.button('Capture Image'):
@@ -27,8 +21,13 @@ on = st.toggle("Camera on")
 st.text("kameraFeed")
 a = st.container(border=True)
 
+@st.fragment(run_every=0.1)          # nur dieser Teil läuft alle 0,1 s neu
+def kamera_feed():
+    if Vilib.img is not None:
+        st.image(Vilib.img, channels="BGR")
+
 if on:
     kamera_starten()
     st.write("Camera activated !")
-    host = st.context.headers.get("host", "localhost").split(":")[0]
-    a.html(f'<img src="http://{host}:9000/mjpg" style="width:100%">')
+    with a:
+        kamera_feed()
