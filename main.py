@@ -5,30 +5,7 @@ from picamera2 import Picamera2
 import time
 import numpy as np #nur für grau screen
 
-#------------------------------------------------------------------------------
-### GUI
-#------------------------------------------------------------------------------
 
-
-
-st.set_page_config(page_title="PiCar Camera-Interface")
-st.title("PiCar Camera-Interface")
- 
-bild, tasten = st.columns([2, 1], vertical_alignment="center")
-on = st.toggle("Camera On/Off", value=False, key="camera_toggle")
-platz = st.empty()
- 
- 
-def zeige(text):
-    platz.info(text)
-    time.sleep(3)
-    platz.empty()
- 
- 
- 
-with bild:
-    grau = np.full((360, 480, 3), 150, dtype=np.uint8)
-    st.image(grau, width="stretch")
 
 
 
@@ -85,10 +62,7 @@ on = st.toggle(
     persist_state="page",
 )
 
-if on:
-    camera.on()
-else:
-    camera.off()
+
 
 st.text("kameraFeed")
 container = st.container(border=True)
@@ -98,9 +72,30 @@ if camera.state:
     host = st.context.headers.get("host").split(":")[0]
     container.image(f"http://{host}:9000/mjpg")
 
-# ------------------------------------------------------------------------------
-# buttons
-# ------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+### GUI
+#------------------------------------------------------------------------------
+
+
+
+st.set_page_config(page_title="PiCar Camera-Interface")
+st.title("PiCar Camera-Interface")
+ 
+bild, tasten = st.columns([2, 1], vertical_alignment="center")
+on = st.toggle("Camera On/Off", value=False, key="camera_toggle")
+platz = st.empty()
+ 
+ 
+def zeige(text):
+    platz.info(text)
+    time.sleep(3)
+    platz.empty()
+ 
+ 
+ 
+with bild:
+    grau = np.full((360, 480, 3), 150, dtype=np.uint8)
+    st.image(grau, width="stretch")
  
 with bild:
     grau = np.full((360, 480, 3), 150, dtype=np.uint8)
@@ -114,6 +109,8 @@ with tasten:
     if st.button("Disconnect", width="stretch"):
         zeige("Disconnect gedrückt")
     if on:
-        zeige("Camera ON")
+        get_camera().on()
+    else:
+        get_camera().off()
 
 
