@@ -9,15 +9,15 @@ from picamera2 import Picamera2
 
 col1, col2 = st.columns([1, 1])
 with col2:
-    if st.button('Capture Image', icon_position='right'):
+    if st.button('Capture Image'):
         print('irgendwas')
 
 with col2:
-    if st.button('Shake Camera', icon_position='right'):
+    if st.button('Shake Camera'):
         print('Shaking ass')
 
 with col2:
-    if st.button('Disconnect', icon_position='right'):
+    if st.button('Disconnect'):
         print('Disconnecting')
 
 # ------------------------------------------------------------------------------
