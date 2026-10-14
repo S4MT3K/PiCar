@@ -1,23 +1,11 @@
-import time
-import numpy as np
+
 import streamlit as st
 from vilib import Vilib
+from picamera2 import Picamera2
 
-
-def bild_da():
-    return isinstance(Vilib.img, np.ndarray)
-
-
-@st.cache_resource
-def kamera_starten():
-    Vilib.camera_start(vflip=False, hflip=False)
-    Vilib.display(local=False, web=False)
-    for _ in range(50):            # max. 5 s auf das erste Bild warten
-        if bild_da():
-            break
-        time.sleep(0.1)
-    return True
-
+# ------------------------------------------------------------------------------
+# buttons
+# ------------------------------------------------------------------------------
 
 if st.button('Capture Image'):
     print('irgendwas')
@@ -28,22 +16,68 @@ if st.button('Shake Camera'):
 if st.button('Disconnect'):
     print('Disconnecting')
 
-on = st.toggle("Camera on")
+# ------------------------------------------------------------------------------
+# video
+# ------------------------------------------------------------------------------
 
-st.text("kameraFeed")
-a = st.container(border=True)
+class Camera:
+    __state: bool
 
+    def __init__(self):
+        self.__state = False
 
-@st.fragment(run_every=0.1)
-def kamera_feed():
-    if bild_da():
-        st.image(Vilib.img, channels="BGR")
-    else:
-        st.caption("Warte auf Kamerabild …")
+    @property
+    def state(self):
+        return self.__state
 
+    def on(self):
+        if self.__state:
+            return
+
+        self.__state = True
+        Vilib.camera_start()
+
+        # we only need the web view
+        Vilib.display(local=False, web=True)
+
+    def off(self):
+        if not self.__state:
+            return
+
+        self.__state = False
+        Vilib.camera_close()
+
+        # closing the camera will distroy the picamera2 object configurations
+        # the configurations are only created on __init__ so simply create a new instance
+        Vilib.picam2 = Picamera2();
+
+    def toggle(self):
+        if self.__state:
+            self.off()
+        else:
+            self.on()
+
+@st.cache_resource
+def get_camera():
+    return Camera()
+camera = get_camera()
+
+on = st.toggle(
+    "Camera on",
+    key="camera_on",
+    value=camera.state,
+    persist_state="page",
+)
 
 if on:
-    kamera_starten()
+    camera.on()
+else:
+    camera.off()
+
+st.text("kameraFeed")
+container = st.container(border=True)
+
+if camera.state:
     st.write("Camera activated !")
-    with a:
-        kamera_feed()
+    host = st.context.headers.get("host").split(":")[0]
+    container.image(f"http://{host}:9000/mjpg")
