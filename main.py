@@ -1,12 +1,10 @@
-
 import streamlit as st
 from vilib import Vilib
 from picamera2 import Picamera2
 import time
-import numpy as np #nur für grau screen
+import numpy as np  # nur für grau screen
 
-
-
+st.set_page_config(page_title="PiCar Camera-Interface")
 
 
 # ------------------------------------------------------------------------------
@@ -42,7 +40,7 @@ class Camera:
 
         # closing the camera will distroy the picamera2 object configurations
         # the configurations are only created on __init__ so simply create a new instance
-        Vilib.picam2 = Picamera2();
+        Vilib.picam2 = Picamera2()
 
     def toggle(self):
         if self.__state:
@@ -50,67 +48,53 @@ class Camera:
         else:
             self.on()
 
+
 @st.cache_resource
 def get_camera():
     return Camera()
+
+
 camera = get_camera()
 
-on = st.toggle(
-    "Camera on",
-    key="camera_on",
-    value=camera.state,
-    persist_state="page",
-)
 
+# ------------------------------------------------------------------------------
+# GUI
+# ------------------------------------------------------------------------------
 
-
-st.text("kameraFeed")
-container = st.container(border=True)
-
-if camera.state:
-    st.write("Camera activated !")
-    host = st.context.headers.get("host").split(":")[0]
-    container.image(f"http://{host}:9000/mjpg")
-
-#------------------------------------------------------------------------------
-### GUI
-#------------------------------------------------------------------------------
-
-
-
-st.set_page_config(page_title="PiCar Camera-Interface")
 st.title("PiCar Camera-Interface")
- 
+
 bild, tasten = st.columns([2, 1], vertical_alignment="center")
-on = st.toggle("Camera On/Off", value=False, key="camera_toggle")
+
+with bild:
+    bildplatz = st.empty()
+
+with tasten:
+    screenshot = st.button("Take Screenshot", width="stretch")
+    shake = st.button("Shake Camera", width="stretch")
+    disconnect = st.button("Disconnect", width="stretch")
+
+on = st.toggle("Camera On/Off", value=camera.state, key="camera_toggle")
 platz = st.empty()
- 
- 
+
+
 def zeige(text):
     platz.info(text)
     time.sleep(3)
     platz.empty()
- 
- 
- 
-with bild:
-    grau = np.full((360, 480, 3), 150, dtype=np.uint8)
-    st.image(grau, width="stretch")
- 
-with bild:
-    grau = np.full((360, 480, 3), 150, dtype=np.uint8)
-    st.image(grau, width="stretch")
- 
-with tasten:
-    if st.button("Take Screenshot", width="stretch"):
-        zeige("Take Screenshot gedrückt")
-    if st.button("Shake Camera", width="stretch"):
-        zeige("Shake Camera gedrückt")
-    if st.button("Disconnect", width="stretch"):
-        zeige("Disconnect gedrückt")
-    if on:
-        get_camera().on()
-    else:
-        get_camera().off()
 
 
+if on:
+    camera.on()
+    host = st.context.headers.get("host").split(":")[0]
+    bildplatz.image(f"http://{host}:9000/mjpg", width="stretch")
+else:
+    camera.off()
+    grau = np.full((360, 480, 3), 150, dtype=np.uint8)
+    bildplatz.image(grau, width="stretch")
+
+if screenshot:
+    zeige("Take Screenshot gedrückt")
+if shake:
+    zeige("Shake Camera gedrückt")
+if disconnect:
+    zeige("Disconnect gedrückt")
