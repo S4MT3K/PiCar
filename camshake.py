@@ -2,7 +2,12 @@ import time
 import math 
 from picarx import Picarx
 
-px = Picarx()
+import streamlit as st
+
+@st.cache_resource
+def get_picarx():
+    return Picarx()
+px = get_picarx()
 
 def smooth_shake(duration=3.0, frequency=15, amplitude=8):
     start_time = time.time()
