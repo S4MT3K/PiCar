@@ -2,15 +2,16 @@ import time
 import math 
 from picarx import Picarx
 
-import streamlit as st
-
-@st.cache_resource
-def get_picarx():
-    return Picarx()
-px = get_picarx()
+px = Picarx()
+active_shake = False
 
 def smooth_shake(duration=3.0, frequency=15, amplitude=8):
+    global active_shake
+
+    if active_shake:
+        return
     start_time = time.time()
+    active_shake = True
     
     while time.time() - start_time < duration:
         elapsed = time.time() - start_time
@@ -23,6 +24,7 @@ def smooth_shake(duration=3.0, frequency=15, amplitude=8):
 
     px.set_cam_pan_angle(0)
     px.set_cam_tilt_angle(0)
+    active_shake = False
 
 if __name__ == "__main__":
     try: 
