@@ -2,6 +2,7 @@
 import streamlit as st
 from vilib import Vilib
 from picamera2 import Picamera2
+import camshake
 
 # ------------------------------------------------------------------------------
 # buttons
@@ -11,6 +12,7 @@ if st.button('Capture Image'):
     print('irgendwas')
 
 if st.button('Shake Camera'):
+    camshake.smooth_shake()
     print('Shaking ass')
 
 if st.button('Disconnect'):
