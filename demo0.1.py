@@ -18,7 +18,7 @@ def frame_generator():
         ok, frame = cv2.imencode(".jpg", frame)
         yield ok, frame
 
-def get_generator():
+def get_or_start_generator():
     global subscriber, frames
 
     # allready filming
@@ -26,6 +26,7 @@ def get_generator():
         return frames
 
     # start new generator
+    subscriber += 1
     frames = frame_generator()
 
     return frames
@@ -33,8 +34,7 @@ def get_generator():
 def camera_stream():
     global subscriber
 
-    subscriber += 1
-    _frames = get_generator()
+    _frames = get_or_start_generator()
 
     try:
         while True:
