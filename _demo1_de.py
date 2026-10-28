@@ -48,4 +48,29 @@ def intermediateFrame():
 def frameGenerator():
     global lastFrame, frameToStream, isFilming, lastCallCameraPlay
     while isFilming:
-        frame =
+        frame = camera.capture_array()
+        success, frame = cv2.imencode('.jpg', frame)
+        if not success:
+            continue  
+        frame = frame.tobytes()
+        with lock:                 # das Schreiben ist jetzt im Lock
+            lastFrame = frame
+            if lastCallCameraPlay is not None and time.time() - lastCallCameraPlay > 10:
+                cameraStop()
+                print("Camera stopped due to inactivity.")
+                break
+
+def cameraPlay():
+    global isFilming, lastFrame, lastCallCameraPlay, camera
+    lastCallCameraPlay = time.time()
+    camera = Picamera2()           # neue Kamera bei jedem Einschalten
+    camera.configure(camera.create_video_configuration(main={"size": (640, 480), "format": "RGB888"}))
+    camera.start()
+    isFilming = True
+    threading.Thread(target=frameGenerator, daemon=True).start()   # Thread, damit nichts blockiert - ich bin nicht sicher, wie
+    print ("camera up")                                            # er arbeitet, aber klar, er ist nötig
+
+@acces.route("/stream")
+def stream():
+    return Response(toStream(), mimetype="multipart/x-mixed-replace; boundary=frame")   # toStream(), das ist der Generator
+acces.run(host="0.0.0.0", port=8080, threaded=True)
