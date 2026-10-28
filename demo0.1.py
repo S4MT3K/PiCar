@@ -17,46 +17,24 @@ camera.start() # Resources?
 # frame generator
 # ------------------------------------------------------------------------------
 
-subscriber = 0
-frames = None
-
 def frame_generator():
-    while subscriber != 0:
+    while True:
         frame = camera.capture_array()
         ok, frame = cv2.imencode(".jpg", frame)
-        yield ok, frame
-
-def get_or_start_generator():
-    global subscriber, frames
-
-    # allready filming
-    if subscriber != 0 and frames:
-        return frames
-
-    # start new generator
-    frames = frame_generator()
-
-    return frames
+        if not ok:
+            continue
+        yield frame
 
 # ------------------------------------------------------------------------------
 # routes
 # ------------------------------------------------------------------------------
 
 def camera_stream():
-    global subscriber
+    frames = frame_generator()
 
-    _frames = get_or_start_generator()
-    subscriber += 1
-
-    try:
-        while True:
-            ok, frame = next(_frames)
-            if not ok:
-                continue
-            frame = frame.tobytes()
-            yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + frame + b"\r\n"
-    finally:
-        subscriber -= 1
+    while True:
+        frame = next(frames).tobytes()
+        yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + frame + b"\r\n"
 
 @acces.route("/stream")
 def stream():
