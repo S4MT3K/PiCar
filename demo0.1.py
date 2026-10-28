@@ -34,7 +34,6 @@ def get_or_start_generator():
         return frames
 
     # start new generator
-    subscriber += 1
     frames = frame_generator()
 
     return frames
@@ -47,6 +46,7 @@ def camera_stream():
     global subscriber
 
     _frames = get_or_start_generator()
+    subscriber += 1
 
     try:
         while True:
