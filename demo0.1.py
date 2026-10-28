@@ -6,12 +6,20 @@ import cv2, time
 # setup
 # ------------------------------------------------------------------------------
 
-acces = Flask(__name__)    #We make a flask instance so we can use it later
-FPS = 30   #set a system speed
+# We make a flask instance so we can use it later
+acces = Flask(__name__)    
+
+# set a system speed
+FPS = 30
 
 camera = Picamera2()
-camera.configure(camera.create_video_configuration(main={"size": (640, 480), "format": "RGB888"}))
-camera.start() # Resources?
+camera.configure(camera.create_video_configuration(main={
+    "size": (640, 480),
+    "format": "RGB888",
+}))
+
+# Resources?
+camera.start()
 
 # ------------------------------------------------------------------------------
 # frame generator
@@ -38,7 +46,10 @@ def camera_stream():
 
 @acces.route("/stream")
 def stream():
-    return Response(camera_stream(), mimetype="multipart/x-mixed-replace; boundary=frame")
+    return Response(
+        camera_stream(),
+        mimetype="multipart/x-mixed-replace; boundary=frame",
+    )
 
 # ------------------------------------------------------------------------------
 # start web server
